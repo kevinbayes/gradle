@@ -18,6 +18,7 @@ package org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact;
 
 import com.google.common.collect.Sets;
 import org.gradle.api.artifacts.ResolutionStrategy;
+import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.graph.DependencyGraphNode;
 import org.gradle.internal.component.local.model.LocalConfigurationMetadata;
@@ -82,11 +83,19 @@ public class DefaultResolvedArtifactsBuilder implements DependencyArtifactsVisit
             return;
         }
 
-        if (from.getOwner().getComponentId() instanceof ProjectComponentIdentifier) {
-            // This is here to attempt to leave out build dependencies that would cause a cycle in the task graph for the current build, so that the cross-build cycle detection kicks in. It's not fully correct
-            ProjectComponentIdentifier incomingId = (ProjectComponentIdentifier) from.getOwner().getComponentId();
-            if (!incomingId.getBuild().isCurrentBuild()) {
-                return;
+        // TODO:DAZ Make this better
+        // For a dependency from _another_ build to _this_ build, don't make the artifact buildable
+        // Doing so leads to poor error reporting due to direct task dependency cycle (losing the intervening build dependencies)
+        ComponentIdentifier sourceComponent = from.getOwner().getComponentId();
+        if (sourceComponent instanceof ProjectComponentIdentifier) {
+            if (!((ProjectComponentIdentifier) sourceComponent).getBuild().isCurrentBuild()) {
+                ComponentIdentifier targetComponent = to.getOwner().getComponentId();
+                if (targetComponent instanceof ProjectComponentIdentifier) {
+                    boolean currentBuild = ((ProjectComponentIdentifier) targetComponent).getBuild().isCurrentBuild();
+                    if (currentBuild) {
+                        return;
+                    }
+                }
             }
         }
 
