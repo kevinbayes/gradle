@@ -96,7 +96,6 @@ public class ProjectDependencyResolver implements ComponentMetaDataResolver, Dep
     public void resolveArtifacts(ComponentResolveMetadata component, BuildableComponentArtifactsResolveResult result) {
         if (isProjectModule(component.getComponentId())) {
             ComponentArtifacts artifacts = new MetadataSourcedComponentArtifacts();
-            artifacts = new ProjectDependencyComponentArtifacts(artifactBuilder, artifacts);
             result.resolved(artifacts);
         }
     }
