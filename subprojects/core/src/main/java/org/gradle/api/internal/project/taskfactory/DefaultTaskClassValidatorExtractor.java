@@ -144,7 +144,7 @@ public class DefaultTaskClassValidatorExtractor implements TaskClassValidatorExt
             public void visitType(Class<? super T> type) {
                 Map<String, Field> fields = getFields(type);
                 Method[] methods = type.getDeclaredMethods();
-                Arrays.sort(methods, Ordering.usingToString());
+                //Arrays.sort(methods, Ordering.usingToString());
                 for (Method method : methods) {
                     PropertyAccessorType accessorType = PropertyAccessorType.of(method);
                     if (accessorType == null || accessorType == PropertyAccessorType.SETTER || method.isBridge() || GroovyMethods.isObjectMethod(method)) {
